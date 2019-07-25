@@ -1,4 +1,4 @@
-todo_list = ['14493-SRR5341341']
+todo_list = ['14034-ERR400386', '14108-ERR400460']
 
 ruleorder: tb_profiler > move_output
 
@@ -9,10 +9,10 @@ rule all:
 
 rule tb_profiler:
     input:
-        bam = expand('/home/ubuntu/external_tb/oucru_robot/{sample}/phenix_bbduk/{sample}.bam', sample = todo_list)
+        bam = '/home/ubuntu/external_tb/oucru_robot/{sample}/phenix_bbduk/{sample}.bam'
     output:
-        json = '{sample}.json'
-    shell: 
+        '{sample}.json'
+    shell:
         'tb-profiler lineage -a {input.bam} -p {wildcards.sample}'
 
 
@@ -22,4 +22,4 @@ rule move_output:
     output:
         '/home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
     shell:
-        'mv {sample}.json /home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
+        'mv {wildcards.sample}.json /home/ubuntu/external_tb/oucru_robot/{wildcards.sample}/tb_profiler/{wildcards.sample}.json'
