@@ -1,25 +1,25 @@
 todo_list = ['14493-SRR5341341']
 
-#ruleorder: tb_profiler > move_output
+ruleorder: tb_profiler > move_output
 
 rule all:
     input:
-        #expand('/home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json', sample = todo_list)
-        expand('{sample}.json', sample = todo_list)
+        expand('/home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json', sample = todo_list)
+        #expand('{sample}.json', sample = todo_list)
 
 rule tb_profiler:
     input:
-        '/home/ubuntu/external_tb/oucru_robot/{sample}/phenix_bbduk/{sample}.bam'
+        bam = expand('/home/ubuntu/external_tb/oucru_robot/{sample}/phenix_bbduk/{sample}.bam', sample = todo_list)
     output:
-        'tb_profiler.json'
+        json = '{sample}.json'
     shell: 
-        'tb-profiler lineage -a {input}'
+        'tb-profiler lineage -a {input.bam} -p {wildcards.sample}'
 
 
-#rule move_output:
-#    input:
-#        '{sample}.json'
-#    output:
-#        '/home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
-#    shell:
-#        'mv {sample}.json /home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
+rule move_output:
+    input:
+        '{sample}.json'
+    output:
+        '/home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
+    shell:
+        'mv {sample}.json /home/ubuntu/external_tb/oucru_robot/{sample}/tb_profiler/{sample}.json'
