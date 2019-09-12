@@ -18,23 +18,28 @@ rule all:
     input:
         '{results_dir}/multiqc.html'
 
-
-
 rule fastqc:
     input:
-        expand('{root_dir}/{sample}_{1,2}.fastq.gz')
+        read1 = '{root_dir}/{id}/{id}_1.fastq.gz',
+        read2 = '{root_dir}/{id}/{id}_2.fastq.gz'
 
     output:
-        '{sample}_1.fastqc.zip', '{sample}_2.fastqc.zip'
+        r1_res = '{root_dir}/{id}/fastqc/{id}_1_fastqc.zip',
+        r2_res = '{root_dir}/{id}/fastqc/{id}_2_fastqc.zip'
 
     shell:
-        'fastqc {input}'
+        '''
+        mkdir {root_dir}/{wildcards.id}/fastqc/
+        fastqc -o {root_dir}/{wildcards.id}/fastqc/ {input.read1}
+        fastqc -o {root_dir}/{wildcards.id}/fastqc/ {input.read2}
+        '''
         
 
 rule multiqc:
-    fastqcs = expand('{root_dir}/{sample}/fastqc')
+    # fastqcs = expand('{root_dir}/{sample}/fastqc')
+    
     input:
-        expand('{root_dir}/{sample}/fastqc')
+        rules.fastqc.output.r1_res, rules.fastqc.output.r2_res
 
     output:
         '{results_dir}/multiqc.html'
