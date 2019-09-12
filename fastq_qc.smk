@@ -10,6 +10,8 @@ Things I want to do:
     * bbduk
 '''
 
+## from here https://github.com/jakevc/snakemake_multiqc/blob/master/Snakefile
+
 root_dir = '/home/ubuntu/tm_data/ssuis_chickens/test'
 results_dir = '/home/ubuntu/tm_data/ssuis_chickens/run_results'
 todo_list = ['ERR120091']
