@@ -33,14 +33,24 @@ rule shovill:
             r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
             r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     output:
-        '{root_dir}/{sample}/shovill/contigs.fa'
+        final = '{root_dir}/{sample}/shovill/contigs.fa',
+        graph = '{root_dir}/{sample}/shovill/contigs.gfa',
+        spades = '{root_dir}/{sample}/shovill/spades.fasta'
     shell:
         'shovill --outdir {root_dir}/{wildcards.sample}/shovill -R1 {input.r1} -R2 {input.r2} --cpus {params.threads} --ram {params.ram} --force'
 
 rule move_shovill_output:
     input:
-        rules.shovill.output
+        final = rules.shovill.output.final,
+        graph = rules.shovill.output.graph,
+        spades = rules.shovill.output.spades
     output:
-        '{root_dir}/{sample}/shovill/{sample}_contigs.fa'
+        final = '{root_dir}/{sample}/shovill/{sample}_contigs.fa',
+        graph = '{root_dir}/{sample}/shovill/{sample}_contigs.gfa',
+        spades = '{root_dir}/{sample}/shovill/{sample}_spades.fasta'
+
     shell:
-        'mv {input} {output}'
+        '''mv {input.final} {output.final}
+        mv {input.graph} {output.graph}
+        mv {input.spades} {output.spades}
+        '''
