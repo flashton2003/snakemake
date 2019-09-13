@@ -18,6 +18,8 @@ rule phenix_snp_pipeline:
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     output:
     	'{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf'
+    conda:
+        '../../envs/phenix.yaml'
     shell:
     	'''
     	phenix.py run_snp_pipeline \
