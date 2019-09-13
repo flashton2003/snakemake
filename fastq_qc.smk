@@ -46,8 +46,8 @@ rule move_fastqc_output:
     run:
         cmds = zip(input, output)
         for c in cmds:
-            print c[0], c[1]
-        # 'mv {input} {output}'
+            print(c[0], c[1])
+            shell('mv {c[0]} {c[1]}')
 
 
 # rule multiqc:
