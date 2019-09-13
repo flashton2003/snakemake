@@ -1,3 +1,4 @@
+import os
 
 '''
 Input: 
@@ -27,22 +28,32 @@ rule all:
 rule fastqc:
     input:
         fastqs = expand(['{root_dir}/{sample}/{sample}_1.fastq.gz', '{root_dir}/{sample}/{sample}_2.fastq.gz'], sample = todo_list, root_dir = root_dir)
-
     output:
-        fastqc_zips = expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip'], sample = todo_list, root_dir = root_dir)
+        expand(['{root_dir}/{sample}/{sample}_1_fastqc.zip', '{root_dir}/{sample}/{sample}_2_fastqc.zip', '{root_dir}/{sample}/{sample}_1_fastqc.html', '{root_dir}/{sample}/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
 
     shell:
         '''
-        mkdir {root_dir}/{sample}/fastqc/
-        fastqc -o {root_dir}/{sample}/fastqc/ {input.fastqs}
+        fastqc {input.fastqs}
         '''
         
+# separating out the move output bit, as couldn't get the wildcard recognied in output. think about going back to last git commit.
+rule move_fastqc_output:
+    input:
+        map(str, rules.fastqc.output)
+    output:
+        expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'],     sample = todo_list, root_dir = root_dir) 
+    run:
+        base_name = o.path.basename(output)
+        shell(f'''mkdir -p {base_name}
+        mv {input} {output}
+        ''')
+
 
 rule multiqc:
     input:
         # change this to something like rules.fastqc.output
         #expand(['{root_dir}/{sample}/fastqc/'], sample = todo_list, root_dir = root_dir)
-        rules.fastqc.output.fastqc_zips
+        rules.move_fastqc_output.output
 
     output:
         f'{results_dir}/multiqc_report.html'
