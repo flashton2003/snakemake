@@ -23,7 +23,7 @@ assert os.path.exists(root_dir)
 
 rule all:
     input:
-        expand('{root_dir}/{sample}/shovill/contigs.fa', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/shovill/{sample}_contigs.fa', sample = todo_list, root_dir = root_dir)
 
 rule shovill:
     params:
@@ -36,3 +36,11 @@ rule shovill:
         '{root_dir}/{sample}/shovill/contigs.fa'
     shell:
         'shovill --outdir {root_dir}/{wildcards.sample}/shovill -R1 {input.r1} -R2 {input.r2} --cpus {params.threads} --ram {params.ram} --force'
+
+rule move_shovill_output:
+    input:
+        rules.shovill.output
+    output:
+        '{root_dir}/{sample}/shovill/{sample}_contigs.fa'
+    shell:
+        'mv {input} {output}'
