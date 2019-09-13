@@ -61,14 +61,15 @@ rule multiqc:
 
 rule bbduk:
     input:
-        ['{root_dir}/{sample}/{sample}_1.fastq.gz', '{root_dir}/{sample}/{sample}_2.fastq.gz']
+        r1 = '{root_dir}/{sample}/{sample}_1.fastq.gz'
+        r2 = '{root_dir}/{sample}/{sample}_2.fastq.gz'
 
     output:
         ['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz']
 
     run:
         for x in input:
-            print(x)
+            print(r1, r2)
         # 'bbduk.sh ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in=!{forward} in2=!{reverse} out=!{pair_id}_bbduk_1.fastq.gz out2=!{pair_id}_bbduk_2.fastq.gz ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
 
 
