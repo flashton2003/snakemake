@@ -54,3 +54,5 @@ rule move_shovill_output:
         mv {input.graph} {output.graph}
         mv {input.spades} {output.spades}
         '''
+
+
