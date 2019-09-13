@@ -24,6 +24,7 @@ if not os.path.exists(results_dir):
     os.mkdir(results_dir)
 
 
+## expand statement goes at the end (bottom) of each path in the dag
 rule all:
     input:
         f'{results_dir}/multiqc_report.html',
