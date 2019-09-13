@@ -38,16 +38,13 @@ rule fastqc:
         'fastqc {input}'
         
 # separating out the move output bit, as couldn't get the wildcard recognied in output. think about going back to last git commit.
-# rule move_fastqc_output:
-#     input:
-#         map(str, rules.fastqc.output)
-#     output:
-#         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'],     sample = todo_list, root_dir = root_dir) 
-#     run:
-#         base_name = o.path.basename(output)
-#         shell(f'''mkdir -p {base_name}
-#         mv {input} {output}
-#         ''')
+rule move_fastqc_output:
+    input:
+        rules.fastqc.output
+    output:
+        ['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html']
+    shell:
+        'mv {input} {output}'
 
 
 # rule multiqc:
