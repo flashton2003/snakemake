@@ -45,6 +45,9 @@ rule move_fastqc_output:
         ['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html']
     run:
         cmds = zip(input, output)
+        basename = os.path.basename(input[0])
+        if not os.path.exists(basename):
+            shell('mkdir -p {basename}')
         for c in cmds:
             print(c[0], c[1])
             shell('mv {c[0]} {c[1]}')
