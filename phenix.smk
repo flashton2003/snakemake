@@ -11,11 +11,11 @@ rule all:
         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
 
 rule phenix_snp_pipeline:
-	params:
-		reference = ''
 	input:
         r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
+    params: 
+		reference = ''
     output:
     	'{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf'
     conda:
