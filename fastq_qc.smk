@@ -66,9 +66,9 @@ rule bbduk:
     output:
         ['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz']
 
-    shell:
+    run:
         for x in input:
-            print x
+            print(x)
         # 'bbduk.sh ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in=!{forward} in2=!{reverse} out=!{pair_id}_bbduk_1.fastq.gz out2=!{pair_id}_bbduk_2.fastq.gz ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
 
 
