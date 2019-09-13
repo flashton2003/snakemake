@@ -26,7 +26,7 @@ todo_list = ['ERR120091']
 
 rule all:
     input:
-        expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
+        rules.multiqc.output
 
 
 rule fastqc:
@@ -53,14 +53,14 @@ rule move_fastqc_output:
             shell('mv {c[0]} {c[1]}')
 
 
-# rule multiqc:
-#     input:
+rule multiqc:
+    input:
 #         # change this to something like rules.fastqc.output
 #         #expand(['{root_dir}/{sample}/fastqc/'], sample = todo_list, root_dir = root_dir)
-#         rules.move_fastqc_output.output
+        expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
 
-#     output:
-#         f'{results_dir}/multiqc_report.html'
+    output:
+        '{results_dir}/multiqc_report.html'
 
-#     shell:
-#         'multiqc -o {results_dir} {input}'
+    shell:
+        'multiqc -o {results_dir} {input}'
