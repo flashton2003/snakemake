@@ -26,8 +26,7 @@ todo_list = ['ERR120091']
 
 rule all:
     input:
-        rules.multiqc.output
-
+        f'{results_dir}/multiqc_report.html'
 
 rule fastqc:
     input:
