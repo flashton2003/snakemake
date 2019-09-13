@@ -23,7 +23,7 @@ assert os.path.exists(root_dir)
 
 rule all:
     input:
-        expand('{root_dir}/{sample}/shovill/{sample}_contigs.fa', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.fa', sample = todo_list, root_dir = root_dir)
 
 rule shovill:
     params:
@@ -33,11 +33,11 @@ rule shovill:
             r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
             r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     output:
-        final = '{root_dir}/{sample}/shovill/contigs.fa',
-        graph = '{root_dir}/{sample}/shovill/contigs.gfa',
-        spades = '{root_dir}/{sample}/shovill/spades.fasta'
+        final = '{root_dir}/{sample}/shovill_bbduk/contigs.fa',
+        graph = '{root_dir}/{sample}/shovill_bbduk/contigs.gfa',
+        spades = '{root_dir}/{sample}/shovill_bbduk/spades.fasta'
     shell:
-        'shovill --outdir {root_dir}/{wildcards.sample}/shovill -R1 {input.r1} -R2 {input.r2} --cpus {params.threads} --ram {params.ram} --force'
+        'shovill --outdir {root_dir}/{wildcards.sample}/shovill_bbduk -R1 {input.r1} -R2 {input.r2} --cpus {params.threads} --ram {params.ram} --force'
 
 rule move_shovill_output:
     input:
@@ -45,9 +45,9 @@ rule move_shovill_output:
         graph = rules.shovill.output.graph,
         spades = rules.shovill.output.spades
     output:
-        final = '{root_dir}/{sample}/shovill/{sample}_contigs.fa',
-        graph = '{root_dir}/{sample}/shovill/{sample}_contigs.gfa',
-        spades = '{root_dir}/{sample}/shovill/{sample}_spades.fasta'
+        final = '{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.fa',
+        graph = '{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.gfa',
+        spades = '{root_dir}/{sample}/shovill_bbduk/{sample}_spades.fasta'
 
     shell:
         '''mv {input.final} {output.final}
