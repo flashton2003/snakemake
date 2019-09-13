@@ -1,21 +1,21 @@
-
-
-
 root_dir = '/home/ubuntu/tm_data/ssuis_chickens/test'
 todo_list = ['ERR120091']
-
+ref = '/home/ubuntu/tm_data/ssuis_chickens/reference_genome/2019.09.05/AM946016.fasta'
+config = '/home/ubuntu/tm_data/references/2018.10.08/phenix_config.yml'
 assert os.path.exists(root_dir)
 
 rule all:
     input:
-        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        #expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf', sample = todo_list, root_dir = root_dir)
 
 rule phenix_snp_pipeline:
 	input:
         r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     params: 
-		reference = ''
+		reference = ref
+        phenix_config = config
     output:
     	'{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf'
     conda:
