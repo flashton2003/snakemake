@@ -14,7 +14,7 @@ rule phenix_snp_pipeline:
         r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     params: 
-        reference = ref
+        reference = ref,
         phenix_config = config
     output:
         '{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf'
