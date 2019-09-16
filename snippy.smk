@@ -1,33 +1,26 @@
-root_dir = '/home/ubuntu/tm_data/ssuis_chickens/test'
-todo_list = ['ERR120091']
+
+root_dir = '/home/ubuntu/tm_data/ssuis_chickens/oucru_robot'
+todo_list = ['15335-0014']
 ref = '/home/ubuntu/tm_data/ssuis_chickens/reference_genome/2019.09.05/AM946016.fasta'
-config = '/home/ubuntu/tm_data/references/2018.10.08/phenix_config.yml'
+
 assert os.path.exists(root_dir)
+assert os.path.exists(ref)
 
 rule all:
     input:
         #expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
-        expand('{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/{sample}/snippy_bbduk/{sample}.snps.consensus.subs.fa', sample = todo_list, root_dir = root_dir)
 
-rule phenix_snp_pipeline:
+rule snippy:
     input:
         r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz',
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     params: 
-        reference = ref,
-        phenix_config = config
+        reference = ref
     output:
-        '{root_dir}/{sample}/{sample}/phenix_bbduk/{sample}.filtered.vcf'
+        '{root_dir}/{sample}/snippy_bbduk/{sample}.snps.consensus.subs.fa'
     conda:
         '../../envs/phenix.yaml'
     shell:
-        '''
-        phenix.py run_snp_pipeline \
-        -r1 {input.r1} \
-        -r2 {input.r2} \
-        -r {params.reference} \
-        -c {params.phenix_config} \
-        --keep-temp \
-        --sample-name {wildcards.sample}
-        -o {root_dir}/{wildcards.sample}/{wildcards.sample}/phenix_bbduk
-        '''
+        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --ref {params.ref} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
+        
