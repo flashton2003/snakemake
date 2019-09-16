@@ -38,10 +38,12 @@ rule move_shovill_output:
         '''
 
 rule prokka:
+    params:
+        threads = 8
     input:
-        move_shovill_output.output.final
+        rules.move_shovill_output.output.final
     output:
         '{root_dir}/{sample}/prokka/{sample}.gbk'
     shell:
-        'prokka --outdir {root_dir}/{wildcards.sample}/prokka --prefix {wildcards.sample} {input}'
+        'prokka --outdir {root_dir}/{wildcards.sample}/prokka --force --cpus {params.threads} --prefix {wildcards.sample} {input}'
 
