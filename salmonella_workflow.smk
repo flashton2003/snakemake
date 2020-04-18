@@ -25,6 +25,8 @@ rule fastqc:
         ['{root_dir}/{sample}/{sample}_1.fastq.gz', '{root_dir}/{sample}/{sample}_2.fastq.gz']
     output:
         ['{root_dir}/{sample}/{sample}_1_fastqc.zip', '{root_dir}/{sample}/{sample}_2_fastqc.zip', '{root_dir}/{sample}/{sample}_1_fastqc.html', '{root_dir}/{sample}/{sample}_2_fastqc.html']
+    conda:
+        '../../envs/fastqc.yaml'
     shell:
         'fastqc {input}'
 
@@ -48,6 +50,8 @@ rule multiqc:
         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
         '{results_dir}/multiqc_report.html'
+    conda:
+        '../../envs/multiqc.yaml'
     shell:
         'multiqc -o {results_dir} {input}'
 
@@ -70,7 +74,7 @@ rule shovill:
         threads = 8,
         ram = 32
     input:
-        r1 = rules.bbduk.output.r1
+        r1 = rules.bbduk.output.r1,
         r2 = rules.bbduk.output.r2
     output:
         final = '{root_dir}/{sample}/shovill_bbduk/contigs.fa',

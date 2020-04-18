@@ -47,6 +47,8 @@ rule multiqc:
         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
         '{results_dir}/multiqc_report.html'
+    conda:
+        '../../envs/multiqc.yaml'
     shell:
         'multiqc -o {results_dir} {input}'
 
