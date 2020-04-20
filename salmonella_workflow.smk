@@ -15,9 +15,6 @@ configfile: "/home/ubuntu/scripts/snakemake/configs/salmonella.yaml"
 
 
 todo_list = read_todo_list(config['todo_list'])
-
-print(todo_list)
-
 root_dir = config['root_dir']
 qc_results_dir = config['qc_results_dir']
 
@@ -77,11 +74,12 @@ rule bbduk:
     output:
         r1 = '{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', 
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
-
+    conda:
+        '../../envs/bbmap.yaml'
     run:
-        print(input.r1, input.r2)
-        print(output.r1, output.r2)
-        shell('bbduk.sh ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50')
+        # print(input.r1, input.r2)
+        # print(output.r1, output.r2)
+        shell('bbduk.sh threads=8 ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50')
 
 rule shovill:
     params:
@@ -132,7 +130,16 @@ rule sistr:
     conda:
         '../../envs/sistr.yaml'
     shell:
-        'sistr --qc -f tab -o {output.sistr_results} {input.assembly}'
+        'sistr --qc -f tab -t 4 -o {output.sistr_results} {input.assembly}'
 
+rule amr_finder_plus:
+    input:
+        assembly = rules.move_shovill_output.output.final
+    output:
+        amr_finder_plus_results = '{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv'
+    conda:
+        '../../envs/amrfinderplus.yaml'
+    shell:
+        'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4'
 
 
