@@ -9,9 +9,15 @@ def read_todo_list(todo_list):
     with open(todo_list) as fi:
         lines = fi.readlines()
         lines = [x.strip() for x in lines]
-    return todo_list
+    return lines
+
+configfile: "/home/ubuntu/scripts/snakemake/configs/salmonella.yaml"
+
 
 todo_list = read_todo_list(config['todo_list'])
+
+print(todo_list)
+
 root_dir = config['root_dir']
 qc_results_dir = config['qc_results_dir']
 
@@ -26,7 +32,7 @@ rule all:
         f'{qc_results_dir}/multiqc_report.html',
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/sistr/{sample}.sistr.tsv', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir)
 
 rule fastqc:
     input:
@@ -122,9 +128,9 @@ rule sistr:
     input:
         assembly = rules.move_shovill_output.output.final
     output:
-        sistr_results = '{root_dir}/{sample}/sistr/{sample}.sistr.tsv'
+        sistr_results = '{root_dir}/{sample}/sistr/{sample}.sistr.tab'
     conda:
-        '../../sistr.yaml'
+        '../../envs/sistr.yaml'
     shell:
         'sistr --qc -f tab -o {output.sistr_results} {input.assembly}'
 
