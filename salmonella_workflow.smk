@@ -158,16 +158,16 @@ rule amr_finder_plus:
     shell:
         'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4'
 
-rule snippy:
-    input:
-        r1 = rules.bbduk.output.r1,
-        r2 = rules.bbduk.output.r2
-    output:
-        '{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa'
-    conda:
-        '../../envs/snippy.yaml'
-    shell:
-        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --reference {ref_genome} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
+#rule snippy:
+#    input:
+#        r1 = rules.bbduk.output.r1,
+#        r2 = rules.bbduk.output.r2
+#    output:
+#        '{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa'
+#    conda:
+#        '../../envs/snippy.yaml'
+#    shell:
+#        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --reference {ref_genome} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
 
 
  
