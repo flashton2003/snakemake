@@ -16,19 +16,19 @@ def read_todo_list(todo_list):
     return lines
 
 def check_fasta_lengths(root_dir, todo_list, ref_genome):
-	ref_len = len(SeqIO.read(ref_genome, 'fasta').seq)
-	for sample in todo_list:
-		fasta_handle = f'{root_dir}/{sample}/phenix_bbduk/{sample}.fasta'
-		assert len(SeqIO.read(fasta_handle, 'fasta').seq) == ref_len
+    ref_len = len(SeqIO.read(ref_genome, 'fasta').seq)
+    for sample in todo_list:
+        fasta_handle = f'{root_dir}/{sample}/phenix_bbduk/{sample}.fasta'
+        assert len(SeqIO.read(fasta_handle, 'fasta').seq) == ref_len
 
 def read_excluded_positions(excluded_positions_handle):
-	excluded_positions = []
-	with open(excluded_positions_handle) as fi:
-		lines = fi.readlines()
+    excluded_positions = []
+    with open(excluded_positions_handle) as fi:
+        lines = fi.readlines()
         lines = [x.strip() for x in lines]
         for l in lines:
-        	split_l = l.split()
-        	excluded_positions.append((split_l[0], split_l[1]))
+            split_l = l.split()
+            excluded_positions.append((split_l[0], split_l[1]))
     return excluded_positions
 
 todo_list = read_todo_list(config['todo_list'])
@@ -42,51 +42,51 @@ check_fasta_lengths(root_dir, todo_list, ref_genome)
 excluded_positions = read_excluded_positions(excluded_positions_handle)
 
 rule all:
-	input:
-		'{output_dir}/{output_handle}.treefile'
+    input:
+        '{output_dir}/{output_handle}.treefile'
 
 rule make_bedfile:
-	input:
-		todo_list = todo_list,
-		excluded_positions = excluded_positions
-	output:
-		expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
-	run:
-		with open(output) as fo:
-			for x in excluded_positions:
-				fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
+    input:
+        todo_list = todo_list,
+        excluded_positions = excluded_positions
+    output:
+        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
+    run:
+        with open(output) as fo:
+            for x in excluded_positions:
+                fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
 
 
 rule mask_fastas:
-	input:
-		expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
-	output:
-		expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', sample = todo_list, root_dir = root_dir)
+    input:
+        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+    output:
+        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', sample = todo_list, root_dir = root_dir)
 
 
 rule gather_fastas:
-	input:
-		expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
-	output:
-		'{output_dir}/{output_handle}'
-	run:
-		s = ' '.join(todo_list)
-		shell(f'cat {s} > {output}')
+    input:
+        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+    output:
+        '{output_dir}/{output_handle}'
+    run:
+        s = ' '.join(todo_list)
+        shell(f'cat {s} > {output}')
 
 rule run_iqtree:
-	input:
-		gather_fastas.output
-	output:
-		'{output_dir}/{output_handle}.treefile'
-	conda:
-		'../../envs/iqtree.yaml'
-	shell:
-		'iqtree -s {input} -nt AUTO -t PARS -ninit 2'
-	
+    input:
+        gather_fastas.output
+    output:
+        '{output_dir}/{output_handle}.treefile'
+    conda:
+        '../../envs/iqtree.yaml'
+    shell:
+        'iqtree -s {input} -nt AUTO -t PARS -ninit 2'
+        
 
 
 
-	
+    
 
 
 
