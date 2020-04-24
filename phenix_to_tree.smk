@@ -45,17 +45,17 @@ rule all:
     input:
         f'{output_dir}/{output_handle}.treefile'
 
-rule make_bedfile:
-    input:
-        todo_list = todo_list,
-        excluded_positions = excluded_positions
-    output:
-        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
-    run:
-        #print(output)
-        with open(output) as fo:
-            for x in excluded_positions:
-                fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
+# rule make_bedfile:
+#     input:
+#         todo_list = todo_list,
+#         excluded_positions = excluded_positions
+#     output:
+#         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
+#     run:
+#         #print(output)
+#         with open(output) as fo:
+#             for x in excluded_positions:
+#                 fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
 
 
 rule mask_fastas:
@@ -64,8 +64,12 @@ rule mask_fastas:
         #bedfile = rules.make_bedfile.output
     output:
         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', sample = todo_list, root_dir = root_dir)
-    shell:
-        'bedtools maskfasta -fi {input.consensus} -bed {root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed -fo {output}'
+    run:
+        for sample in todo_list:
+            with open(f'{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', 'w') as fo:
+                for x in excluded_positions:
+                    fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
+        shell('bedtools maskfasta -fi {input.consensus} -bed {root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed -fo {output}')
 
 ruleorder: gather_fastas > run_iqtree
 
