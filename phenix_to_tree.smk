@@ -43,7 +43,7 @@ excluded_positions = read_excluded_positions(excluded_positions_handle)
 
 rule all:
     input:
-        '{output_dir}/{output_handle}.treefile'
+        f'{output_dir}/{output_handle}.treefile'
 
 rule make_bedfile:
     input:
@@ -52,6 +52,7 @@ rule make_bedfile:
     output:
         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
     run:
+        #print(output)
         with open(output) as fo:
             for x in excluded_positions:
                 fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
@@ -59,14 +60,18 @@ rule make_bedfile:
 
 rule mask_fastas:
     input:
-        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        consensus = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        #bedfile = rules.make_bedfile.output
     output:
         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', sample = todo_list, root_dir = root_dir)
+    shell:
+        'bedtools maskfasta -fi {input.consensus} -bed {root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed -fo {output}'
 
+ruleorder: gather_fastas > run_iqtree
 
 rule gather_fastas:
     input:
-        expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        rules.mask_fastas.output
     output:
         '{output_dir}/{output_handle}'
     run:
@@ -75,7 +80,7 @@ rule gather_fastas:
 
 rule run_iqtree:
     input:
-        gather_fastas.output
+        rules.gather_fastas.output
     output:
         '{output_dir}/{output_handle}.treefile'
     conda:
