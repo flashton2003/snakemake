@@ -17,6 +17,7 @@ configfile: "/home/ubuntu/scripts/snakemake/configs/salmonella.yaml"
 todo_list = read_todo_list(config['todo_list'])
 root_dir = config['root_dir']
 qc_results_dir = config['qc_results_dir']
+ref_genome = config['ref_genome']
 
 assert os.path.exists(root_dir)
 if not os.path.exists(qc_results_dir):  
@@ -29,7 +30,10 @@ rule all:
         f'{qc_results_dir}/multiqc_report.html',
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
+        expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir),
+        expand('{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa', sample = todo_list, root_dir = root_dir)
+        #'/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella'
 
 rule fastqc:
     input:
@@ -76,10 +80,11 @@ rule bbduk:
         r2 = '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'
     conda:
         '../../envs/bbmap.yaml'
-    run:
+    #run:
         # print(input.r1, input.r2)
         # print(output.r1, output.r2)
-        shell('bbduk.sh threads=8 ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50')
+    shell:
+        'bbduk.sh threads=8 ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
 
 rule shovill:
     params:
@@ -132,6 +137,17 @@ rule sistr:
     shell:
         'sistr --qc -f tab -t 4 -o {output.sistr_results} {input.assembly}'
 
+#rule amr_finder_plus_db:
+#    input:
+#        rules.move_shovill_output.output.final
+#    output:
+#        db = '/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella',
+#        sistr_results = '{root_dir}/{sample}/sistr/{sample}.sistr.tab'
+#    conda:
+#        '../../envs/amrfinderplus.yaml'
+#    shell:
+#        'amrfinder -u'
+
 rule amr_finder_plus:
     input:
         assembly = rules.move_shovill_output.output.final
@@ -142,4 +158,16 @@ rule amr_finder_plus:
     shell:
         'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4'
 
+#rule snippy:
+#    input:
+#        r1 = rules.bbduk.output.r1,
+#        r2 = rules.bbduk.output.r2
+#    output:
+#        '{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa'
+#    conda:
+#        '../../envs/snippy.yaml'
+#    shell:
+#        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --reference {ref_genome} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
 
+
+ 
