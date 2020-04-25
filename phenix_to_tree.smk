@@ -48,7 +48,7 @@ excluded_positions = read_excluded_positions(excluded_positions_handle)
 
 rule all:
    input:
-       f'{output_dir}/{output_handle}.treefile'
+       f'{output_dir}/tree/{output_handle}.treefile'
 
 
 
@@ -74,13 +74,13 @@ rule mask_fastas:
     run:
         shell('bedtools maskfasta -fi {input.consensus} -bed {input.bedfile} -fo {output}')
 
-ruleorder: gather_fastas > run_iqtree
+# ruleorder: gather_fastas > run_iqtree
 
 rule gather_fastas:
     input:
         fasta_list = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', root_dir = root_dir, sample = todo_list)
     output:
-        '{output_dir}/{output_handle}'
+        '{output_dir}/consensus/{output_handle}'
     run:
         s = ' '.join(input.fasta_list)
         shell(f'cat {s} > {output}')
