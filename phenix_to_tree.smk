@@ -89,7 +89,7 @@ rule run_iqtree:
    input:
        rules.gather_fastas.output
    output:
-       '{output_dir}/{output_handle}.treefile'
+       '{output_dir}/tree/{output_handle}.treefile'
    conda:
        '../../envs/iqtree.yaml'
    shell:
