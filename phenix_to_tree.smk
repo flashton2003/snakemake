@@ -80,7 +80,7 @@ rule gather_fastas:
     input:
         fasta_list = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', root_dir = root_dir, sample = todo_list)
     output:
-        '{output_dir}/consensus/{output_handle}'
+        '{output_dir}/consensus/{output_handle}.fasta'
     run:
         s = ' '.join(input.fasta_list)
         shell(f'cat {s} > {output}')
@@ -93,7 +93,7 @@ rule run_iqtree:
    conda:
        '../../envs/iqtree.yaml'
    shell:
-       'iqtree -s {input} -nt AUTO -t PARS -ninit 2'
+       'iqtree -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.* {output_dir}/tree/'
         
 
 
