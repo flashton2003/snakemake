@@ -48,7 +48,7 @@ excluded_positions = read_excluded_positions(excluded_positions_handle)
 
 rule all:
    input:
-       f'{output_dir}/tree/{output_handle}.treefile'
+       f'{output_dir}/tree/{output_handle}.fasta.treefile'
 
 
 
