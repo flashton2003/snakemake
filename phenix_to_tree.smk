@@ -67,7 +67,7 @@ rule make_bedfile:
 
 rule mask_fastas:
     input:
-        consensus = '{root_dir}/{sample}/phenix_bbduk/{sample}.fasta'
+        consensus = '{root_dir}/{sample}/phenix_bbduk/{sample}.fasta',
         bedfile = rules.make_bedfile.output
     output:
         '{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta'
