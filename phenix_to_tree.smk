@@ -41,9 +41,16 @@ excluded_positions_handle = config['excluded_positions']
 check_fasta_lengths(root_dir, todo_list, ref_genome)
 excluded_positions = read_excluded_positions(excluded_positions_handle)
 
-rule all:
-    input:
-        f'{output_dir}/{output_handle}.treefile'
+for sample in todo_list:
+    with open(f'{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', 'w') as fo:
+        for x in excluded_positions:
+            fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
+
+#rule all:
+#    input:
+#        f'{output_dir}/{output_handle}.treefile'
+
+
 
 # rule make_bedfile:
 #     input:
@@ -60,16 +67,13 @@ rule all:
 
 rule mask_fastas:
     input:
-        consensus = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir)
+        consensus = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.fasta', sample = todo_list, root_dir = root_dir),
+        bedfile = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', sample = todo_list, root_dir = root_dir)
         #bedfile = rules.make_bedfile.output
     output:
         expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', sample = todo_list, root_dir = root_dir)
     run:
-        for sample in todo_list:
-            with open(f'{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed', 'w') as fo:
-                for x in excluded_positions:
-                    fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
-        shell('bedtools maskfasta -fi {input.consensus} -bed {root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed -fo {output}')
+        shell('bedtools maskfasta -fi {input.consensus} -bed {input.bedfile} -fo {output}')
 
 ruleorder: gather_fastas > run_iqtree
 
@@ -82,15 +86,15 @@ rule gather_fastas:
         s = ' '.join(todo_list)
         shell(f'cat {s} > {output}')
 
-rule run_iqtree:
-    input:
-        rules.gather_fastas.output
-    output:
-        '{output_dir}/{output_handle}.treefile'
-    conda:
-        '../../envs/iqtree.yaml'
-    shell:
-        'iqtree -s {input} -nt AUTO -t PARS -ninit 2'
+#rule run_iqtree:
+#    input:
+#        rules.gather_fastas.output
+#    output:
+#        '{output_dir}/{output_handle}.treefile'
+#    conda:
+#        '../../envs/iqtree.yaml'
+#    shell:
+#        'iqtree -s {input} -nt AUTO -t PARS -ninit 2'
         
 
 
