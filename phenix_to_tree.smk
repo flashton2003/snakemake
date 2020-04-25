@@ -1,7 +1,6 @@
 from Bio import SeqIO
 
 '''
-
 1. take phenix consensus fastas and assert that they are all the same length
 2. take the consensus fastas and make a bed file with right masking co-ordinates
 3. gather all the consensus fastas
