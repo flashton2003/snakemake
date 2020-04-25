@@ -93,7 +93,7 @@ rule run_iqtree:
    conda:
        '../../envs/iqtree.yaml'
    shell:
-       'iqtree -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.* {output_dir}/tree/'
+       'iqtree -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.fasta.* {output_dir}/tree/'
         
 
 
