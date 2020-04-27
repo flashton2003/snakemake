@@ -53,15 +53,15 @@ rule all:
 
 rule make_bedfile:
     input:
-        todo_list = todo_list,
-        excluded_positions = excluded_positions
+        #todo_list = todo_list,
+        #excluded_positions = excluded_positions
+        '{root_dir}/{sample}/phenix_bbduk/'
     output:
         '{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed'
     run:
-        #print(output)
-        with open(output) as fo:
+        with open(f'{root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed', 'w') as fo:
             for x in excluded_positions:
-                fo.write(f'{sample}\t{x[0]}\t{x[1]}\n')
+                fo.write(f'{wildcards.sample}\t{x[0]}\t{x[1]}\n')
 
 
 rule mask_fastas:
