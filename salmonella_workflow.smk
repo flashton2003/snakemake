@@ -11,18 +11,17 @@ def read_todo_list(todo_list):
         lines = [x.strip() for x in lines]
     return lines
 
-configfile: "/home/ubuntu/scripts/snakemake/configs/salmonella.yaml"
-
+#configfile: "/home/ubuntu/scripts/snakemake/configs/salmonella.yaml"
+#configfile: "/home/ubuntu/.config/snakemake/salmonella_slurm/config.yaml"
 
 todo_list = read_todo_list(config['todo_list'])
 root_dir = config['root_dir']
 qc_results_dir = config['qc_results_dir']
-ref_genome = config['ref_genome']
+#ref_genome = config['ref_genome']
 
 assert os.path.exists(root_dir)
 if not os.path.exists(qc_results_dir):  
-    os.mkdir(qc_results_dir)
-
+    os.makedirs(qc_results_dir)
 
 ## expand statement goes at the end (bottom) of each path in the dag
 rule all:

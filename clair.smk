@@ -1,7 +1,7 @@
 
 root_dir = '/home/ubuntu/tm_data/replimune/raw_data/2020.03.24'
-todo_list = ['RH018A_NGS_Sequence_Data', 'RH018_WGSv2-8002-0052CT_page_179', 'RP1_MVSS_NGS_SequenceData-8002-0039ACp30', 'RP1_REP1116M_NGS_Reassembly', 'RP1_REP1116M_NGS_Sequence_Data-8002-0039ACpage24', 'RP1_WVSS_Qualification', 'RP2-BHK-Derived', 'RP2_MVSS-Derived', 'RP3_MVSS_BH', 'RP3_Pre-MVSS_Derived', 'RP3_Pre-MVSS_T80-8002-0056AC_page_106']
-todo_list = ['RH018A_NGS_Sequence_Data']
+todo_list = ['RH018_WGSv2-8002-0052CT_page_179', 'RP1_MVSS_NGS_SequenceData-8002-0039ACp30', 'RP1_REP1116M_NGS_Reassembly', 'RP1_REP1116M_NGS_Sequence_Data-8002-0039ACpage24', 'RP1_WVSS_Qualification', 'RP2-BHK-Derived', 'RP2_MVSS-Derived', 'RP3_MVSS_BH', 'RP3_Pre-MVSS_Derived', 'RP3_Pre-MVSS_T80-8002-0056AC_page_106']
+todo_list = ['RP2_MVSS-Derived']
 output_dir = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.10'
 ref = '/home/ubuntu/tm_data/replimune/reference_genome/2020.03.27/NC_001806.2.fasta'
 contig_name = 'NC_001806.2'
@@ -17,31 +17,31 @@ rule all:
 
 rule minimap:
     input:
-        reads = '/home/ubuntu/tm_data/replimune/raw_data/2020.03.24/{sample}/{sample}.fastq.gz'
+        reads = '%s/{sample}/{sample}.fastq.gz' % root_dir
     params: 
         reference = ref,
         threads = threads
     output:
-        '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.bam'
+        '{output_dir}/{sample}/{sample}.bam'
     shell:
         'minimap2 -H -a -x map-pb -t {params.threads} {params.reference} {input.reads} | samtools sort --threads 8 > {output}' 
 
 rule index_bam:
     input:
-        bam = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.bam'
+        bam = '{output_dir}/{sample}/{sample}.bam'
     output:
-        '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.bam.bai'
+        '{output_dir}/{sample}/{sample}.bam.bai'
     shell:
         'samtools index {input.bam}'
 
 rule remove_non_primary_aln:
     input:
-        bam = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.bam',
-        index = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.bam.bai'
+        bam = '{output_dir}/{sample}/{sample}.bam',
+        index = '{output_dir}/{sample}/{sample}.bam.bai'
     params:
         threads = threads
     output:
-        bam = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.primary_aln.bam'
+        bam = '{output_dir}/{sample}/{sample}.primary_aln.bam'
     run:
         shell('samtools view -F 256 -b --threads {params.threads} -o {output.bam} {input.bam}')
         shell('samtools index {output.bam}')
@@ -50,7 +50,7 @@ rule remove_non_primary_aln:
 
 rule clair:
     input:
-        bam = '/home/ubuntu/tm_data/replimune/variant_calling/2020.04.02/{sample}/{sample}.primary_aln.bam'
+        bam = '{output_dir}/{sample}/{sample}.primary_aln.bam'
     params:
         threads = threads,
         reference = ref,
@@ -74,7 +74,7 @@ rule extract_mixed_positions:
     output:
         vcf = '{output_dir}/{sample}/{sample}.mixed.vcf'
     shell:
-        'bcftools filter -Ov -e \'AF<0.1 | AF>=0.6\'{input.vcf} | bcftools filter -Ov -i \'TYPE=\"SNP\"\' '
+        'bcftools filter -Ov -e \'AF<0.1 | AF>=0.6\' {input.vcf} | bcftools filter -Ov -i \'TYPE=\"SNP\"\' -o {output.vcf}'
 
 
 
