@@ -30,8 +30,8 @@ rule all:
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir)
+        #expand('{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa', sample = todo_list, root_dir = root_dir)
         #'/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella'
 
 rule fastqc:
@@ -64,10 +64,11 @@ rule multiqc:
         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
         '{qc_results_dir}/multiqc_report.html'
-    conda:
-        '../../envs/multiqc.yaml'
-    shell:
-        'multiqc -o {qc_results_dir} {input}'
+    #conda:
+    #    '../../envs/multiqc.yaml'
+    run:
+        shell('conda activate multiqc')
+        shell('multiqc -o {qc_results_dir} {input}')
 
 rule bbduk:
     input:
