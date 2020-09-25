@@ -30,6 +30,7 @@ rule all:
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
+        expand('{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.assembly_stats.tsv', sample = todo_list, root_dir = root_dir)
         expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir)
         #expand('{root_dir}/{sample}/snippy_bbduk/{sample}.consensus.subs.fa', sample = todo_list, root_dir = root_dir)
         #'/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella'
@@ -117,6 +118,17 @@ rule move_shovill_output:
         mv {input.graph} {output.graph}
         mv {input.spades} {output.spades}
         '''
+
+rule assembly_stats:
+    input:
+        assembly = rules.move_shovill_output.final
+    output:
+        stats = '{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.assembly_stats.tsv',
+    conda:
+        '../../envs/assembly_stats.yaml'
+    shell:
+        'assembly_stats {input.assembly} > {output.stats}'
+
 rule mlst:
     input:
         assembly = rules.move_shovill_output.output.final
