@@ -19,6 +19,8 @@ root_dir = config['root_dir']
 qc_results_dir = config['qc_results_dir']
 #ref_genome = config['ref_genome']
 
+kraken_threads = 8
+
 assert os.path.exists(root_dir)
 if not os.path.exists(qc_results_dir):  
     os.makedirs(qc_results_dir)
@@ -26,7 +28,7 @@ if not os.path.exists(qc_results_dir):
 ## expand statement goes at the end (bottom) of each path in the dag
 rule all:
     input:
-        f'{qc_results_dir}/multiqc_report.html',
+        #f'{qc_results_dir}/multiqc_report.html',
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
@@ -181,14 +183,15 @@ rule amr_finder_plus:
 #    shell:
 #        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --reference {ref_genome} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
 
-rule kraken:
+rule kraken2:
     input:
         r1 = rules.bbduk.output.r1,
         r2 = rules.bbduk.output.r2
     output:
-        '{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt'
+        kraken_report = '{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt'
+    threads: kraken_threads
     conda:
         '../../envs/kraken2.yaml'
     shell:
-        'kraken2 --gzip-compressed --use-names --output - --db /home/ubuntu/external_tb/kraken2/database/2020.09.28/gtdb_r89_54k_kraken2_full --report {output.kraken_report} --threads 8 --confidence 0.9 --memory-mapping --paired {input.r1} {input.r2}'
+        'kraken2 --gzip-compressed --use-names --output - --db /home/ubuntu/external_tb/kraken2/database/2020.09.28/gtdb_r89_54k_kraken2_full --report {output.kraken_report} --threads {threads} --confidence 0.9 --memory-mapping --paired {input.r1} {input.r2}'
  
