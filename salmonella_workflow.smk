@@ -15,11 +15,9 @@ def read_todo_list(todo_list):
 #configfile: "/home/ubuntu/.config/snakemake/salmonella_slurm/config.yaml"
 
 todo_list = read_todo_list(config['todo_list'])
-## adding a hack to get around symlink shit
-input_dir = config['input_dir']
 root_dir = config['root_dir']
+amrfinder_db = '/home/ubuntu/hao_shigella/salmonella/reference_genomes/2021.02.10/2020-12-17.1'
 qc_results_dir = config['qc_results_dir']
-#ref_genome = config['ref_genome']
 
 kraken_threads = 8
 
@@ -32,7 +30,7 @@ rule all:
     input:
         #f'{qc_results_dir}/multiqc_report.html',
         #expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
-        expand(['{input_dir}/{sample}_bbduk_1.fastq.gz', '{input_dir}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, input_dir = input_dir),
+        expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.assembly_stats.tsv', sample = todo_list, root_dir = root_dir),
@@ -154,16 +152,15 @@ rule sistr:
     shell:
         'sistr --qc -f tab -t 4 -o {output.sistr_results} {input.assembly}'
 
-#rule amr_finder_plus_db:
-#    input:
-#        rules.move_shovill_output.output.final
-#    output:
-#        db = '/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella',
-#        sistr_results = '{root_dir}/{sample}/sistr/{sample}.sistr.tab'
-#    conda:
-#        '../../envs/amrfinderplus.yaml'
-#    shell:
-#        'amrfinder -u'
+rule star_amr:
+    input:
+        rules.move_shovill_output.output.final
+    output:
+        star_amr_output = = '{root_dir}/{sample}/star_amr/{sample}.star_amr.tsv'
+    conda:
+        '../../envs/staramr.yaml'
+    shell:
+        'amrfinder -u'
 
 rule amr_finder_plus:
     input:
@@ -173,7 +170,7 @@ rule amr_finder_plus:
     conda:
         '../../envs/amrfinderplus.yaml'
     shell:
-        'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4'
+        'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4 --name {wildcards.sample} -d {amrfinder_db}'
 
 #rule snippy:
 #    input:
