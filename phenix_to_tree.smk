@@ -60,6 +60,8 @@ rule make_bedfile:
         '{root_dir}/{sample}/phenix_bbduk/'
     output:
         '{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed'
+    conda:
+        '../../envs/bedtools.yaml'
     run:
         with open(f'{root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed', 'w') as fo:
             for x in excluded_positions:
