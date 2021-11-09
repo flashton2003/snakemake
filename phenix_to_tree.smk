@@ -17,7 +17,8 @@ def read_todo_list(todo_list):
 def check_fasta_lengths(root_dir, todo_list, ref_genome):
     ref_len = len(SeqIO.read(ref_genome, 'fasta').seq)
     for sample in todo_list:
-        fasta_handle = f'{root_dir}/{sample}/phenix_bbduk/{sample}.fasta'
+        # fasta_handle = f'{root_dir}/{sample}/phenix_bbduk/{sample}.fasta'
+        fasta_handle = f'{sample}/phenix_bbduk/{sample}.fasta'
         assert len(SeqIO.read(fasta_handle, 'fasta').seq) == ref_len
 
 def read_excluded_positions(excluded_positions_handle):
@@ -55,9 +56,11 @@ rule make_bedfile:
     input:
         #todo_list = todo_list,
         #excluded_positions = excluded_positions
-        '{root_dir}/{sample}/phenix_bbduk/'
+        # '{root_dir}/{sample}/phenix_bbduk/'
+        '{sample}/phenix_bbduk/'
     output:
-        '{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed'
+        # '{root_dir}/{sample}/phenix_bbduk/{sample}.masking.bed'
+        '{sample}/phenix_bbduk/{sample}.masking.bed'
     run:
         with open(f'{root_dir}/{wildcards.sample}/phenix_bbduk/{wildcards.sample}.masking.bed', 'w') as fo:
             for x in excluded_positions:
@@ -66,10 +69,12 @@ rule make_bedfile:
 
 rule mask_fastas:
     input:
-        consensus = '{root_dir}/{sample}/phenix_bbduk/{sample}.fasta',
+        # consensus = '{root_dir}/{sample}/phenix_bbduk/{sample}.fasta',
+        consensus = '{sample}/phenix_bbduk/{sample}.fasta',
         bedfile = rules.make_bedfile.output
     output:
-        '{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta'
+        # '{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta'
+        '{sample}/phenix_bbduk/{sample}.masked.fasta'
     run:
         shell('bedtools maskfasta -fi {input.consensus} -bed {input.bedfile} -fo {output}')
 
@@ -77,7 +82,8 @@ rule mask_fastas:
 
 rule gather_fastas:
     input:
-        fasta_list = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', root_dir = root_dir, sample = todo_list)
+        # fasta_list = expand('{root_dir}/{sample}/phenix_bbduk/{sample}.masked.fasta', root_dir = root_dir, sample = todo_list)
+        fasta_list = expand('{sample}/phenix_bbduk/{sample}.masked.fasta', root_dir = root_dir, sample = todo_list)
     output:
         '{output_dir}/consensus/{output_handle}.fasta'
     run:
@@ -92,7 +98,7 @@ rule run_iqtree:
    conda:
        '../../envs/iqtree.yaml'
    shell:
-       'iqtree -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.fasta.* {output_dir}/tree/'
+       'iqtree -m K3Pu+F+I -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.fasta.* {output_dir}/tree/'
         
 
 
