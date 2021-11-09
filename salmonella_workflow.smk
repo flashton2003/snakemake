@@ -16,8 +16,8 @@ def read_todo_list(todo_list):
 
 todo_list = read_todo_list(config['todo_list'])
 root_dir = config['root_dir']
+amrfinder_db = '/home/ubuntu/hao_shigella/salmonella/reference_genomes/2021.02.10/2020-12-17.1'
 qc_results_dir = config['qc_results_dir']
-#ref_genome = config['ref_genome']
 
 kraken_threads = 8
 
@@ -29,12 +29,13 @@ if not os.path.exists(qc_results_dir):
 rule all:
     input:
         #f'{qc_results_dir}/multiqc_report.html',
+        #expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/sistr/{sample}.sistr.tab', sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/shovill_bbduk/{sample}_contigs.assembly_stats.tsv', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir),
-        expand('{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt', sample = todo_list, root_dir = root_dir)
+        expand('{root_dir}/{sample}/amr_finder_plus/{sample}.amr_finder_plus.tsv', sample = todo_list, root_dir = root_dir)
+        #expand('{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt', sample = todo_list, root_dir = root_dir)
         #'/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella'
 
 rule fastqc:
@@ -151,16 +152,15 @@ rule sistr:
     shell:
         'sistr --qc -f tab -t 4 -o {output.sistr_results} {input.assembly}'
 
-#rule amr_finder_plus_db:
-#    input:
-#        rules.move_shovill_output.output.final
-#    output:
-#        db = '/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella',
-#        sistr_results = '{root_dir}/{sample}/sistr/{sample}.sistr.tab'
-#    conda:
-#        '../../envs/amrfinderplus.yaml'
-#    shell:
-#        'amrfinder -u'
+rule star_amr:
+    input:
+        rules.move_shovill_output.output.final
+    output:
+        star_amr_output = = '{root_dir}/{sample}/star_amr/{sample}.star_amr.tsv'
+    conda:
+        '../../envs/staramr.yaml'
+    shell:
+        'amrfinder -u'
 
 rule amr_finder_plus:
     input:
@@ -170,7 +170,7 @@ rule amr_finder_plus:
     conda:
         '../../envs/amrfinderplus.yaml'
     shell:
-        'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4'
+        'amrfinder -n {input.assembly} -O Salmonella --output {output.amr_finder_plus_results} --threads 4 --name {wildcards.sample} -d {amrfinder_db}'
 
 #rule snippy:
 #    input:
@@ -183,15 +183,15 @@ rule amr_finder_plus:
 #    shell:
 #        'snippy --outdir {root_dir}/{wildcards.sample}/snippy_bbduk --reference {ref_genome} --R1 {input.r1} --R2 {input.r2} --cpus 8 --force --prefix {wildcards.sample}'
 
-rule kraken2:
-    input:
-        r1 = rules.bbduk.output.r1,
-        r2 = rules.bbduk.output.r2
-    output:
-        kraken_report = '{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt'
-    threads: kraken_threads
-    conda:
-        '../../envs/kraken2.yaml'
-    shell:
-        'kraken2 --gzip-compressed --use-names --output - --db /home/ubuntu/external_tb/kraken2/database/2020.09.28/gtdb_r89_54k_kraken2_full --report {output.kraken_report} --threads {threads} --confidence 0.9 --memory-mapping --paired {input.r1} {input.r2}'
+#rule kraken2:
+#    input:
+#        r1 = rules.bbduk.output.r1,
+#        r2 = rules.bbduk.output.r2
+#    output:
+#        kraken_report = '{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt'
+#    threads: kraken_threads
+#    conda:
+#        '../../envs/kraken2.yaml'
+#    shell:
+#        'kraken2 --gzip-compressed --use-names --output - --db /home/ubuntu/external_tb/kraken2/database/2020.09.28/gtdb_r89_54k_kraken2_full --report {output.kraken_report} --threads {threads} --confidence 0.9 --memory-mapping --paired {input.r1} {input.r2}'
  
