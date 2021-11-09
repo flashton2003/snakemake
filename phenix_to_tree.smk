@@ -11,7 +11,7 @@ from Bio import SeqIO
 def read_todo_list(todo_list):
     with open(todo_list) as fi:
         lines = fi.readlines()
-        lines = [x.strip() for x in lines]
+        lines = [x.strip().split('\t') for x in lines]
     return lines
 
 def check_fasta_lengths(root_dir, todo_list, ref_genome):
@@ -31,8 +31,9 @@ def read_excluded_positions(excluded_positions_handle):
             excluded_positions.append((split_l[0], split_l[1]))
     return excluded_positions
 
+# todo list [(location of data, sample name), ('/home/ubuntu/external_tb/salmonella/oucru_robot', '19410-ERR1010002')]
 todo_list = read_todo_list(config['todo_list'])
-root_dir = config['root_dir']
+# root_dir = config['root_dir']
 output_dir = config['output_dir']
 output_handle = config['output_handle']
 ref_genome = config['ref_genome']
@@ -90,15 +91,15 @@ rule gather_fastas:
         s = ' '.join(input.fasta_list)
         shell(f'cat {s} > {output}')
 
-rule run_iqtree:
-   input:
-       rules.gather_fastas.output
-   output:
-       '{output_dir}/tree/{output_handle}.fasta.treefile'
-   conda:
-       '../../envs/iqtree.yaml'
-   shell:
-       'iqtree -m K3Pu+F+I -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.fasta.* {output_dir}/tree/'
+# rule run_iqtree:
+#    input:
+#        rules.gather_fastas.output
+#    output:
+#        '{output_dir}/tree/{output_handle}.fasta.treefile'
+#    conda:
+#        '../../envs/iqtree.yaml'
+#    shell:
+#        'iqtree -m K3Pu+F+I -s {input} -nt AUTO -t PARS -ninit 2; mv {output_dir}/consensus/{output_handle}.fasta.* {output_dir}/tree/'
         
 
 
