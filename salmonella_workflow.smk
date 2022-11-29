@@ -4,7 +4,6 @@ import os
 ## alternative within conda https://multiqc.info/docs/#snakemake
 
 
-
 def read_todo_list(todo_list):
     with open(todo_list) as fi:
         lines = fi.readlines()
@@ -16,7 +15,7 @@ def read_todo_list(todo_list):
 
 todo_list = read_todo_list(config['todo_list'])
 root_dir = config['root_dir']
-amrfinder_db = '/home/ubuntu/hao_shigella/salmonella/reference_genomes/2021.02.10/2020-12-17.1'
+amrfinder_db = '/home/phil/miniconda3/envs/amrfinderplus/share/amrfinderplus/data/2022-10-11.2/'
 qc_results_dir = config['qc_results_dir']
 
 kraken_threads = 8
