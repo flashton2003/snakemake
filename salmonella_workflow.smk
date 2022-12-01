@@ -38,6 +38,7 @@ rule all:
         #expand('{root_dir}/{sample}/kraken2/{sample}.kraken_report.txt', sample = todo_list, root_dir = root_dir)
         #'/home/ubuntu/smk_slrm/.snakemake/conda/62c554cd/share/amrfinderplus/data/2020-03-20.1/AMR_DNA-Salmonella'
 
+
 rule fastqc:
     input:
         ['{root_dir}/{sample}/{sample}_1.fastq.gz', '{root_dir}/{sample}/{sample}_2.fastq.gz']
@@ -47,6 +48,7 @@ rule fastqc:
         '../../envs/fastqc.yaml'
     shell:
         'fastqc {input}'
+
 
 rule move_fastqc_output:
     input:
@@ -62,17 +64,19 @@ rule move_fastqc_output:
             print(c[0], c[1])
             shell('mv {c[0]} {c[1]}')
 
+
 ## do the expand bit in the multiqc as this is the last section which requires all these, and snakemake works by 'pulling'
 rule multiqc:
     input:
         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
-        '{qc_results_dir}/multiqc_report.html'
+        '{qc_results_dir}/multiqc_report.untrimmed.html'
     conda:
         '../../envs/multiqc.yaml'
     shell:
         #shell('conda activate multiqc')
         'multiqc -o {qc_results_dir} {input}'
+
 
 rule bbduk:
     input:
@@ -90,6 +94,45 @@ rule bbduk:
     shell:
         'bbduk.sh threads=8 ref={path_to_adapters_fasta} in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
 
+
+rule fastqc_bbduk:
+    input:
+        [rules.bbduk.output.r1, r2 = rules.bbduk.output.r2]
+    output:
+        ['{root_dir}/{sample}/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/{sample}_bduk_2_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.html']
+    conda:
+        '../../envs/fastqc.yaml'
+    shell:
+        'fastqc {input}'
+
+
+rule move_fastqc_bbduk_output:
+    input:
+        rules.fastqc_bbduk.output
+    output:
+        ['{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.html']
+    run:
+        cmds = zip(input, output)
+        dirname = os.path.dirname(input[0])
+        if not os.path.exists(dirname):
+            shell('mkdir -p {dirname}')
+        for c in cmds:
+            print(c[0], c[1])
+            shell('mv {c[0]} {c[1]}')
+
+
+rule multiqc:
+    input:
+        expand(['{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
+    output:
+        '{qc_results_dir}/multiqc_report.trimmed.html'
+    conda:
+        '../../envs/multiqc.yaml'
+    shell:
+        #shell('conda activate multiqc')
+        'multiqc -o {qc_results_dir} {input}'
+
+
 rule shovill:
     params:
         threads = 8,
@@ -105,6 +148,7 @@ rule shovill:
         '../../envs/shovill.yaml'
     shell:
         'shovill --outdir {root_dir}/{wildcards.sample}/shovill_bbduk -R1 {input.r1} -R2 {input.r2} --cpus {params.threads} --ram {params.ram} --force'
+
 
 rule move_shovill_output:
     input:
@@ -132,6 +176,7 @@ rule assembly_stats:
     shell:
         'assembly-stats -t {input.assembly} > {output.stats}'
 
+
 rule mlst:
     input:
         assembly = rules.move_shovill_output.output.final
@@ -141,6 +186,7 @@ rule mlst:
         '../../envs/mlst.yaml'
     shell:
         'mlst --scheme senterica --nopath {input.assembly} > {output.mlst_results}'
+
 
 rule sistr:
     input:
@@ -152,6 +198,7 @@ rule sistr:
     shell:
         'sistr --qc -f tab -t 4 -o {output.sistr_results} {input.assembly}'
 
+
 rule star_amr:
     input:
         rules.move_shovill_output.output.final
@@ -161,6 +208,7 @@ rule star_amr:
         '../../envs/staramr.yaml'
     shell:
         'amrfinder -u'
+
 
 rule amr_finder_plus:
     input:
