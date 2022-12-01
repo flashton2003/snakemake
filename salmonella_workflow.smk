@@ -76,7 +76,7 @@ rule multiqc:
         '../../envs/multiqc.yaml'
     shell:
         #shell('conda activate multiqc')
-        'multiqc -o {qc_results_dir} {input}'
+        'multiqc -o {qc_results_dir} --filename multiqc_report.untrimmed.html {input}'
 
 
 rule bbduk:
@@ -131,7 +131,7 @@ rule multiqc_bbduk:
         '../../envs/multiqc.yaml'
     shell:
         #shell('conda activate multiqc')
-        'multiqc -o {qc_results_dir} {input}'
+        'multiqc -o {qc_results_dir} --filename multiqc_report.trimmed.html {input}'
 
 
 rule shovill:
