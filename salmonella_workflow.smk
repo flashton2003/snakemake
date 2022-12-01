@@ -16,7 +16,8 @@ def read_todo_list(todo_list):
 
 todo_list = read_todo_list(config['todo_list'])
 root_dir = config['root_dir']
-amrfinder_db = '/home/ubuntu/hao_shigella/salmonella/reference_genomes/2021.02.10/2020-12-17.1'
+amrfinder_db = '/home/phil/miniconda3/envs/amrfinderplus/share/amrfinderplus/data/2022-10-11.2'
+path_to_adapters_fasta = '/home/phil/salmonella/references/2022.11.29/adapters.fa'
 qc_results_dir = config['qc_results_dir']
 
 kraken_threads = 8
@@ -28,7 +29,7 @@ if not os.path.exists(qc_results_dir):
 ## expand statement goes at the end (bottom) of each path in the dag
 rule all:
     input:
-        #f'{qc_results_dir}/multiqc_report.html',
+        f'{qc_results_dir}/multiqc_report.html',
         #expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
@@ -68,11 +69,11 @@ rule multiqc:
         expand(['{root_dir}/{sample}/fastqc/{sample}_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
         '{qc_results_dir}/multiqc_report.html'
-    #conda:
-    #    '../../envs/multiqc.yaml'
-    run:
-        shell('conda activate multiqc')
-        shell('multiqc -o {qc_results_dir} {input}')
+    conda:
+        '../../envs/multiqc.yaml'
+    shell:
+        #shell('conda activate multiqc')
+        'multiqc -o {qc_results_dir} {input}'
 
 rule bbduk:
     input:
@@ -88,7 +89,7 @@ rule bbduk:
         # print(input.r1, input.r2)
         # print(output.r1, output.r2)
     shell:
-        'bbduk.sh threads=8 ref=/home/ubuntu/external_tb/references/2019.04.22/adapters.fa in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
+        'bbduk.sh threads=8 ref={path_to_adapters_fasta} in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ktrim=r k=23 mink=11 hdist=1 tbo tpe qtrim=r trimq=20 minlength=50'
 
 rule shovill:
     params:
@@ -156,7 +157,7 @@ rule star_amr:
     input:
         rules.move_shovill_output.output.final
     output:
-        star_amr_output = = '{root_dir}/{sample}/star_amr/{sample}.star_amr.tsv'
+        star_amr_output = '{root_dir}/{sample}/star_amr/{sample}.star_amr.tsv'
     conda:
         '../../envs/staramr.yaml'
     shell:
