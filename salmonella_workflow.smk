@@ -98,7 +98,7 @@ rule bbduk:
 
 rule fastqc_bbduk:
     input:
-        [rules.bbduk.output.r1, rules.bbduk.output.r2]
+        ['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz']
     output:
         ['{root_dir}/{sample}/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/{sample}_bduk_2_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.html']
     conda:
