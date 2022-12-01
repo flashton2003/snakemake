@@ -100,7 +100,7 @@ rule fastqc_bbduk:
     input:
         ['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz']
     output:
-        ['{root_dir}/{sample}/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/{sample}_bduk_2_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.html']
+        ['{root_dir}/{sample}/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.html']
     conda:
         '../../envs/fastqc.yaml'
     shell:
