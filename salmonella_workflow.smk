@@ -28,7 +28,8 @@ if not os.path.exists(qc_results_dir):
 ## expand statement goes at the end (bottom) of each path in the dag
 rule all:
     input:
-        f'{qc_results_dir}/multiqc_report.html',
+        f'{qc_results_dir}/multiqc_report.untrimmed.html',
+        f'{qc_results_dir}/multiqc_report.trimmed.html',
         #expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand(['{root_dir}/{sample}/{sample}_bbduk_1.fastq.gz', '{root_dir}/{sample}/{sample}_bbduk_2.fastq.gz'], sample = todo_list, root_dir = root_dir),
         expand('{root_dir}/{sample}/mlst/{sample}.mlst.tsv', sample = todo_list, root_dir = root_dir),
@@ -97,7 +98,7 @@ rule bbduk:
 
 rule fastqc_bbduk:
     input:
-        [rules.bbduk.output.r1, r2 = rules.bbduk.output.r2]
+        [rules.bbduk.output.r1, rules.bbduk.output.r2]
     output:
         ['{root_dir}/{sample}/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/{sample}_bduk_2_fastqc.zip', '{root_dir}/{sample}/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/{sample}_bbduk_2_fastqc.html']
     conda:
@@ -121,7 +122,7 @@ rule move_fastqc_bbduk_output:
             shell('mv {c[0]} {c[1]}')
 
 
-rule multiqc:
+rule multiqc_bbduk:
     input:
         expand(['{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.zip', '{root_dir}/{sample}/fastqc/{sample}_bbduk_1_fastqc.html', '{root_dir}/{sample}/fastqc/{sample}_bbduk_2_fastqc.html'], sample = todo_list, root_dir = root_dir)
     output:
