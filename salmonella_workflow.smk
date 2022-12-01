@@ -4,7 +4,6 @@ import os
 ## alternative within conda https://multiqc.info/docs/#snakemake
 
 
-
 def read_todo_list(todo_list):
     with open(todo_list) as fi:
         lines = fi.readlines()
