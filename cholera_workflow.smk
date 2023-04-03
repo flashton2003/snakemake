@@ -185,7 +185,7 @@ rule mlst:
     conda:
         '../../envs/mlst.yaml'
     shell:
-        'mlst --scheme senterica --nopath {input.assembly} > {output.mlst_results}'
+        'mlst --nopath {input.assembly} > {output.mlst_results}'
 
 
 rule amr_finder_plus:
